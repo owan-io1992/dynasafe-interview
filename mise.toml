@@ -4,4 +4,4 @@ kind = "0.29.0"
 kubectl = "1.32.7"
 
 [env]
-KUBECONFIG = "kind/kubeconfig.yaml"
+KUBECONFIG = "{{config_root}}/kind/kubeconfig.yaml"

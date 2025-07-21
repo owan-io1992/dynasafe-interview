@@ -1,0 +1,42 @@
+kind: DaemonSet
+
+service:
+  annotations: 
+    prometheus.io/scrape: "true"
+    prometheus.io/scheme: "http"
+    prometheus.io/path: "/metrics"
+    prometheus.io/port: "8080"
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+
+tolerations: 
+  - key: "node-role.kubernetes.io/control-plane"
+    operator: "Exists"
+    effect: "NoSchedule"
+
+affinity: 
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+          - key: node-role.kubernetes.io/control-plane
+            operator: Exists
+
+serverConfig: |
+  server {
+      listen 8080;
+      location /health {
+          return 200;
+      }
+      location / {
+          proxy_pass http://127.0.0.1:2381;
+      }
+  }
+
+hostNetwork: true

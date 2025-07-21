@@ -1,0 +1,2 @@
+https://artifacthub.io/packages/helm/metrics-server/metrics-server
+

@@ -1,0 +1,18 @@
+services:
+  grafana:
+    image: "grafana/grafana:11.6.3-security-01"
+    volumes:
+      - "./definitions:/var/lib/grafana/dashboards"
+      - "./provisioning:/etc/grafana/provisioning"
+    network_mode: host
+    # ports:
+    #   - "3000:3000"
+    environment:
+      # - GF_FEATURE_TOGGLES_ENABLE=flameGraph traceqlSearch traceQLStreaming correlations metricsSummary traceqlEditor traceToMetrics traceToProfiles datatrails
+      # - GF_INSTALL_PLUGINS=grafana-lokiexplore-app,grafana-exploretraces-app,grafana-pyroscope-app
+      # for demo, use anonymous access
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    extra_hosts:
+      - "prometheus.example.local=127.0.0.1"
