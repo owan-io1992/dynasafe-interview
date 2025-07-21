@@ -1,0 +1,7 @@
+[tools]
+helm = "3.18.4"
+kind = "0.29.0"
+kubectl = "1.32.7"
+
+[env]
+KUBECONFIG = "kind/kubeconfig.yaml"
