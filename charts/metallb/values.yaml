@@ -1,0 +1,15 @@
+prometheus:
+  scrapeAnnotations: true
+
+speaker:
+  affinity: 
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+            - key: role
+              operator: In
+              values: 
+                - infra
+  frr:
+    enabled: false

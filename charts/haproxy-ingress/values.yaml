@@ -1,0 +1,19 @@
+controller:
+  replicaCount: 1
+  kind: Deployment
+  affinity: 
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+            - key: role
+              operator: In
+              values: 
+                - infra
+  service:
+    type: LoadBalancer
+    annotations: 
+      prometheus.io/scrape: "true"
+      prometheus.io/scheme: "http"
+      prometheus.io/path: "/metrics"
+      prometheus.io/port: "1024"

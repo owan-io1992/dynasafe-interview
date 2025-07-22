@@ -5,5 +5,5 @@ datasources:
     type: prometheus
     access: proxy
     uid: prometheus
-    url: http://prometheus.example.local:8080
+    url: http://prometheus.example.local:80
     isDefault: true
