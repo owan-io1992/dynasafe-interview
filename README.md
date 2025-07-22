@@ -142,7 +142,8 @@ helm upgrade --install prometheus prometheus-community/prometheus \
 
 test  
 ```bash
-curl --resolve prometheus.example.local:80:127.0.0.1 http://prometheus.example.local/-/healthy
+$ curl --resolve prometheus.example.local:80:127.0.0.1 http://prometheus.example.local/-/healthy
+Prometheus Server is Healthy.
 ```
 
 3. monitor etcd  
@@ -170,14 +171,15 @@ dashboard save in 2 folder `public`,`custom`
 public: user shared dashboard  
 custom: self-design dashboard  
 
+部份 monitor 因 public dashboard 有非常完整的 panel 並解釋, 因此直接採用不再另外製作 dashboard  
+有不滿足需求或無 public dashboard 的才自行製作 dashboard  
+
 因所有 dashbaord panel 眾多, 我只採部份解釋  
 
 ### node monitor  
 **for detail node monitor**  
 [node-exporter-full](http://127.0.0.1:3000/d/rYdddlPWk/node-exporter-full) (metric by 1 node)  
 ![node-exporter-full](images/node-exporter-full.png)  
-
-此 public dashboard 具有非常完整的 panel 並解釋, 因此直接採用此 dashboard 做 monitor  
 
 example system Utilization, Saturation: disk space  
 左側顯示可用空間,右側顯示已使用空間  
@@ -187,7 +189,7 @@ example system error: OOM-Kill
 ![alt text](images/node-exporter-oom.png)  
 
 
-**for overview node monitor** 
+**for overview node monitor**  
 [node-exporter-overview](http://127.0.0.1:3000/d/oJz6m6LVz/node-exporter-overview) (metric by multiple node)  
 ![node-exporter-overview](images/node-exporter-overview.png)  
 
@@ -219,8 +221,6 @@ monitor pod cpu throuttling
 [etcd-cluster-overview](http://127.0.0.1:3000/d/etcd_cluster/etcd-cluster-overview)
 ![etcd](images/etcd.png)
 
-monitor etcd  
-
 example monitor etcd issue  
 ![alt text](images/etcd_issue.png)  
 heartbeat failures: 記錄 etcd 叢集中的 Leader 節點向 Follower 節點傳送心跳訊息失敗的總次數。心跳訊息對於維持 Leader 的領導地位以及讓 Follower 節點確認 Leader 仍然存活  
@@ -232,8 +232,6 @@ Slow Read Indexes: 記錄 etcd 讀取花費時間過長的次數
 ### Prometheus   
 [prometheus](http://127.0.0.1:3000/d/PROMETHEUS1/prometheus)
 ![prometheus](images/prometheus.png)
-
-monitor prometheus  
 
 
 ## demo application
@@ -247,13 +245,24 @@ helm value file [charts/httpbin/values.yaml](charts/httpbin/values.yaml) setup
 helm upgrade --install httpbin charts/httpbin
 ```
 
+hpa object 
+```bash
+$ k get hpa
+NAME      REFERENCE            TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+httpbin   Deployment/httpbin   cpu: 0%/50%   1         10        1          98m
+
+```
+
 test
 ```bash
-curl --resolve httpbin.chart-example.local:80:127.0.0.1 http://httpbin.chart-example.local/
+$ curl --resolve httpbin.chart-example.local:80:127.0.0.1 http://httpbin.chart-example.local/ip
+{
+  "origin": "10.244.1.1"
+}
 ```
 
 ## teardown
 ```bash
-kind delete cluster -n kind
 docker compose -f grafana/docker-compose.yml down -v 
+kind delete cluster -n kind
 ```
