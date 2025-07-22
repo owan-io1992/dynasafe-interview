@@ -7,3 +7,7 @@ datasources:
     uid: prometheus
     url: http://prometheus.example.local:80
     isDefault: true
+    jsonData:
+      timeout: "300"
+      queryTimeout: "300s"
+      timeInterval: "1m"

@@ -22,8 +22,7 @@ in config file define 4 node, all use kubernetes 1.32.5
 work node add label `role` as node group  
 infra node set `extraPortMappings` for docker forward port to work node  
 
-then crate cluster by config  
-
+crate cluster by config  
 ```bash
 $ kind create cluster --config kind/kind-config.yaml
 Creating cluster "kind" ...
@@ -69,7 +68,7 @@ check infra node ip(INTERNAL-IP)
 ```bash
 $ k get node --selector='role=infra' -o wide 
 NAME          STATUS   ROLES    AGE   VERSION   INTERNAL-IP       EXTERNAL-IP   OS-IMAGE                         KERNEL-VERSION    CONTAINER-RUNTIME
-kind-worker   Ready    <none>   20m   v1.32.5   192.168.252.195   <none>        Debian GNU/Linux 12 (bookworm)   6.14.0-1007-oem   containerd://2.1.1
+kind-worker   Ready    <none>   20m   v1.32.5   192.168.252.194   <none>        Debian GNU/Linux 12 (bookworm)   6.14.0-1007-oem   containerd://2.1.1
 ```
 
 check [charts/metallb/IPAddressPool.yaml](charts/metallb/IPAddressPool.yaml) .spec.addresses is setup infra node ip  
@@ -89,7 +88,7 @@ k apply -f charts/metallb/IPAddressPool.yaml
 k apply -f charts/metallb/L2Advertisement.yaml
 ```
 
-6. install haproxy-ingress 
+6. install haproxy-ingress  
 use haproxy to support ingress feature  
 helm value file [charts/haproxy-ingress/values.yaml](charts/haproxy-ingress/values.yaml) setup  
 - running in infra node  
@@ -106,8 +105,8 @@ helm upgrade --install haproxy-kubernetes-ingress haproxytech/kubernetes-ingress
   --namespace haproxy-controller
 ```
 
-## install monitor
-1. install metrics-server for HPA
+## install monitor  
+1. install metrics-server for HPA  
 helm value file [charts/metrics-server/values.yaml](charts/metrics-server/values.yaml) setup  
 - running in infra node  
 - ignore tls verify certificate  
@@ -121,7 +120,7 @@ helm upgrade --install metrics-server metrics-server/metrics-server \
   --namespace kube-system
 ```
 
-2. install prometheus,node-exporter,kube-state-metrics (access http://prometheus.example.local:8080/)
+2. install prometheus,node-exporter,kube-state-metrics  
 helm value file [charts/prometheus/values.yaml](charts/prometheus/values.yaml) setup  
 - running in infra node  
 - disable alertmanager (not used)  
@@ -137,16 +136,22 @@ helm upgrade --install prometheus prometheus-community/prometheus \
   --namespace prometheus
 ```
 
+test  
+```bash
+curl --resolve prometheus.example.local:80:127.0.0.1 http://prometheus.example.local/-/healthy
+```
+
 3. monitor etcd  
 because etcd cannot configure `listen-metrics-urls` other than 127.0.0.1:2381  
 here install a reverse proxy to scrape metric  
+etcd use `hostNetwork`, so reverse proxy use `hostNetwork` too can scrape metrics from 127.0.0.1  
 ```bash
 helm upgrade --install etcd-proxy charts/nginx \
   -f charts/nginx/etcd-metrics.yaml \
   --namespace prometheus
 ```
 
-4. start grafana  
+4. start grafana   
 use docker to running grafana, and use provisioning feature to config grafana datasource and dashboard   
 ```bash
 docker compose -f grafana/docker-compose.yml up -d 
@@ -155,11 +160,72 @@ docker compose -f grafana/docker-compose.yml up -d
 open http://127.0.0.1:3000 will see grafana is started  
 ![grafana](images/grafana.png)
 
-## explain monitor
+## explain monitor  
+dashboard save in 2 folder `public`,`custom`  
+
+public: user shared dashboard  
+custom: self-design dashboard  
+
+因所有 dashbaord panel 眾多, 我只採部份解釋  
+
+### node monitor  
+**for detail node monitor**  
+[node-exporter-full](http://127.0.0.1:3000/d/rYdddlPWk/node-exporter-full) (metric by 1 node)  
+![node-exporter-full](images/node-exporter-full.png)  
+
+此 public dashboard 具有非常完整的 panel 並解釋, 因此直接採用此 dashboard 做 monitor  
+
+example explain system Utilization, Saturation: disk space  
+左側顯示可用空間,右側顯示已使用空間  
+![alt text](images/node-exporter-full_space.png)  
+
+example explain system error: OOM-Kill  
+![alt text](images/node-exporter-oom.png)  
+
+
+**for overview node monitor** 
+[node-exporter-overview](http://127.0.0.1:3000/d/oJz6m6LVz/node-exporter-overview) (metric by multiple node)  
+![node-exporter-overview](images/node-exporter-overview.png)  
+
+設計用途 for 針對多個 node 進行 monitor  
+只看 cpu/memory/network/disk summary, 避免因 metric 過多造成使用困難   
+
+### kubernetes cluster monitor  
+**cluster wide**  
+[k8s-dashboard](http://127.0.0.1:3000/d/besllvgck2iv4f/k8s-dashboard)  
+![](images/k8s_cluster.png)  
+
+對 cluster overview 的 monitor 可以看到 resource count  
+以及簡易 pod 的 monitor  
+
+**container wide**  
+http://127.0.0.1:3000/d/b1f2555d-fe63-43fe-b67e-940ade68fdea/pod-monitor  
+![pod](images/pod.png)
+
+對 container 的 monitor  
+
+設計 select single pod 時能顯示 limit  
+![pod_limit](images/pod_limit.png)
+
+monitor pod cpu throuttling  
+![pod_cpu_throuttling](images/pod_cpu_throuttling.png)
+
+### etcd monitor  
+
+
+### Prometheus   
+
+
+
 
 
 ## demo application
-use httpbin for demo
+use httpbin for demo  
+helm value file [charts/httpbin/values.yaml](charts/httpbin/values.yaml) setup  
+- running in infra node  
+- expose by ingress
+- HPA for maxpod 10, cpu use 50%
+
 ```bash
 helm upgrade --install httpbin charts/httpbin
 ```
