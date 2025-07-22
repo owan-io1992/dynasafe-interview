@@ -1,4 +1,8 @@
 # dynasafe-interview
+this dynasafe interview repo  
+
+## architecture
+![alt text](architecture.drawio.png)
 
 ## create cluster
 
@@ -175,11 +179,11 @@ custom: self-design dashboard
 
 此 public dashboard 具有非常完整的 panel 並解釋, 因此直接採用此 dashboard 做 monitor  
 
-example explain system Utilization, Saturation: disk space  
+example system Utilization, Saturation: disk space  
 左側顯示可用空間,右側顯示已使用空間  
 ![alt text](images/node-exporter-full_space.png)  
 
-example explain system error: OOM-Kill  
+example system error: OOM-Kill  
 ![alt text](images/node-exporter-oom.png)  
 
 
@@ -188,7 +192,7 @@ example explain system error: OOM-Kill
 ![node-exporter-overview](images/node-exporter-overview.png)  
 
 設計用途 for 針對多個 node 進行 monitor  
-只看 cpu/memory/network/disk summary, 避免因 metric 過多造成使用困難   
+只看 cpu/memory/network/disk summary, 避免因 metric 過多造成使用困難  
 
 ### kubernetes cluster monitor  
 **cluster wide**  
@@ -199,7 +203,7 @@ example explain system error: OOM-Kill
 以及簡易 pod 的 monitor  
 
 **container wide**  
-http://127.0.0.1:3000/d/b1f2555d-fe63-43fe-b67e-940ade68fdea/pod-monitor  
+[pod-monitor](http://127.0.0.1:3000/d/b1f2555d-fe63-43fe-b67e-940ade68fdea/pod-monitor)  
 ![pod](images/pod.png)
 
 對 container 的 monitor  
@@ -208,15 +212,28 @@ http://127.0.0.1:3000/d/b1f2555d-fe63-43fe-b67e-940ade68fdea/pod-monitor
 ![pod_limit](images/pod_limit.png)
 
 monitor pod cpu throuttling  
+監控 Pod 的 CPU 被限制的情況  
 ![pod_cpu_throuttling](images/pod_cpu_throuttling.png)
 
 ### etcd monitor  
+[etcd-cluster-overview](http://127.0.0.1:3000/d/etcd_cluster/etcd-cluster-overview)
+![etcd](images/etcd.png)
 
+monitor etcd  
+
+example monitor etcd issue  
+![alt text](images/etcd_issue.png)  
+heartbeat failures: 記錄 etcd 叢集中的 Leader 節點向 Follower 節點傳送心跳訊息失敗的總次數。心跳訊息對於維持 Leader 的領導地位以及讓 Follower 節點確認 Leader 仍然存活  
+health failures: 追蹤 etcd 成員自身健康檢查失敗的總次數  
+
+Slow Applies: 記錄 etcd 寫入花費時間過長的次數  
+Slow Read Indexes: 記錄 etcd 讀取花費時間過長的次數  
 
 ### Prometheus   
+[prometheus](http://127.0.0.1:3000/d/PROMETHEUS1/prometheus)
+![prometheus](images/prometheus.png)
 
-
-
+monitor prometheus  
 
 
 ## demo application
