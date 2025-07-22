@@ -1,5 +1,5 @@
 # dynasafe-interview
-this dynasafe interview repo  
+this repo is use for dynasafe interview  
 
 ## architecture
 ![alt text](architecture.drawio.png)
